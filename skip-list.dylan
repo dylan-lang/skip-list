@@ -204,7 +204,7 @@ define primary class <basic-skip-list>
   // The probability to create a new level is 1/fan-out, 
   // controls the fan-out of the equivalent tree.
   // Pugh suggests the value of 1/4 for a good space/time trade-off
-  slot probability :: <number>,
+  constant slot probability :: <number>,
      init-value: 0.25,
      init-keyword: probability:;
   
@@ -278,7 +278,7 @@ end method initialize;
 
 
 define method level-for-size (sl :: <basic-skip-list>, size :: <integer>)
-  ceiling(logn(size, 1 / sl.probability));
+  ceiling(logn(as(<double-float>, size), 1 / sl.probability));
 end method;
 
 
@@ -587,8 +587,9 @@ define sealed primary class <skip-list-node> (<object>)
   // We can seal it safely, because the library user should 
   // not know this class exists.  The search key must be comparable by the 
   // key-order function specified for the skip-list
-  slot key :: <object>, init-value: #f,
-                        init-keyword: key:;
+  constant slot key :: <object>,
+    init-value: #f,
+    init-keyword: key:;
   slot value :: <object>, init-value: #f,
                           init-keyword: value:;
 
