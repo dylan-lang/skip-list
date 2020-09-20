@@ -17,25 +17,6 @@ define function make-skip-list ()
 end function;
 
 
-define suite skip-list-suite ()
-  test string-key-test;
-  test make-test;
-  test not-key-order-test;
-  test remove-first-key-test;
-  test remove-last-key-test;
-  test remove-middle-key-test;
-  test empty-test;
-  test backward-iteration-test;
-  test keywise-iteration-test;
-  test missing-test;
-  test reorder-elements-test;
-  test reorder-extra-element-test;
-  test reorder-missing-element-test;
-  test reorder-duped-element-test;
-  test reorder-changed-element-test;
-end suite;
-
-
 define test string-key-test ()
   let skip = make(<skip-list>);
   skip["zzz"] := 1;
@@ -196,5 +177,4 @@ define test reorder-changed-element-test ()
   check-condition("cond check", <error>, skip.element-sequence := sorted);
 end test;
 
-
-run-test-application(skip-list-suite);
+run-test-application();
