@@ -10,18 +10,18 @@ module: Dylan-user
 // the terms of the GNU Lesser General Public License as published by the Free
 // Software Foundation, either version 3 of the License, or (at your option) any
 // later version.
-// 
+//
 // This program is distributed in the hope that it will be useful, but WITHOUT
 // ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 // FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
 // details.
-// 
-// The terms of the GNU Lesser General Public License may be found at 
+//
+// The terms of the GNU Lesser General Public License may be found at
 // <http://www.gnu.org/licenses/lgpl.html>.
-// 
+//
 // If you make changes to the code, port it to another platform, or use it in a
 // major project, please let me know.
-// 
+//
 //==============================================================================
 
 //==============================================================================
@@ -29,7 +29,7 @@ module: Dylan-user
 // Version 1.0
 //
 // Author
-// 
+//
 // KWZ       =    Kai W. Zimmermann, Hamburg, Germany
 //                kwz@kai-zimmermann.de
 // DJV       =    Dustin Voss, Seattle, United States
@@ -37,11 +37,11 @@ module: Dylan-user
 //
 // History
 //
-// 15.03.1996  KWZ  Created in Apple Dylan TR
 // 08.03.2009  DJV  Modified for Gwydion Dylan and Open Dylan.
 //                  Removed <basic-skip-list> and clear-cache; only
 //                  implementors need those things.
 //                  Added iteration independent of key order.
+// 15.03.1996  KWZ  Created in Apple Dylan TR
 //
 //==============================================================================
 
@@ -57,7 +57,7 @@ end library;
 
 define module skip-list
   // Copyright (c) 1996  Kai W. Zimmermann
-  
+
   use dylan,
      // Actually redundant.  Only for documentation purpose.
      export: {element, element-setter, size, key-test,
@@ -77,7 +77,7 @@ define module skip-list
      export: all;
   use pprint,
      import: {printing-logical-block, pprint-newline, pprint-indent};
-  export 
+  export
      // Classes
      <skip-list>,
      // Methods

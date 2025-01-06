@@ -10,7 +10,7 @@ kwz@kai-zimmermann.de
 
 Description
 ===========
- 
+
 A skip-list is a data type equivalent to a balanced (binary) tree. All keys must
 be comparable by some kind of ordering function, e.g., <.
 
@@ -46,10 +46,10 @@ For details see:
   W. Pugh (1990) "Skip Lists: A Probabilistic Alternative to Balanced Trees."
   Communications of the ACM 33 (6): 668-676
 
-I tried to make the library (hash)table like. 
+I tried to make the library (hash)table like.
 
 Create a skip-list, e.g.,       define variable H = make(<skip-list>);
-Now add the elements            H[0] := "A"; H[424] := "B"; H[3] := "G";   
+Now add the elements            H[0] := "A"; H[424] := "B"; H[3] := "G";
 You can look them up via        H[3]
 Map over them with              for (x in H) signal("%s ", x) end;
 Map over them in key order      for (x in H using
@@ -63,7 +63,7 @@ ordering function:              make(<skip-list>,
 
 Some test functions show that Pugh is right. There is very little difference in
 the timing for p=1/2 and p=1/4, even 1/5 is fine. The lower the probability, the
-less space you need, e.g., p=1/2 in theory uses twice as much pointers as p=1/4.
+less space you need, e.g., p=1/2 in theory uses twice as many pointers as p=1/4.
 E.g., with p=1/4 and 10000 elements you need about 24 key comparisons to look up
 one value. The measures are about the same for p=1/2, but the maximum level used
 - and therefore the number of pointers - is about two times higher. A totally
