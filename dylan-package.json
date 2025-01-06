@@ -1,0 +1,16 @@
+{
+    "name": "skip-list",
+    "version": "0.2.0",
+    "url": "https://github.com/dylan-lang/skip-list",
+    "description": "Skip list collection",
+    "keywords": [
+        "collections"
+    ],
+    "category": "utilities",
+    "contact": "dylan-lang@googlegroups.com",
+    "dependencies": [],
+    "dev-dependencies": [
+        "testworks"
+    ],
+    "license": "LGPL"
+}
