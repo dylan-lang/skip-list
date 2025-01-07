@@ -5,23 +5,23 @@ module: skip-list
 //
 // Copyright (c) 1996 by Kai W. Zimmermann, Hamburg, Germany
 // Distributed under the terms of the GNU Lesser General Public License (LGPL)
-// 
+//
 // This program is free software: you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
 // Software Foundation, either version 3 of the License, or (at your option) any
 // later version.
-// 
+//
 // This program is distributed in the hope that it will be useful, but WITHOUT
 // ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 // FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
 // details.
-// 
-// The terms of the GNU Lesser General Public License may be found at 
+//
+// The terms of the GNU Lesser General Public License may be found at
 // <http://www.gnu.org/licenses/lgpl.html>.
-// 
+//
 // If you make changes to the code, port it to another platform, or use it in a
 // major project, please let me know.
-// 
+//
 //==============================================================================
 
 //==============================================================================
@@ -29,7 +29,7 @@ module: skip-list
 // Version 1.0
 //
 // Author
-// 
+//
 // KWZ       =    Kai W. Zimmermann, Hamburg, Germany
 //                kwz@kai-zimmermann.de
 // DJV       =    Dustin Voss, Seattle, United States
@@ -37,16 +37,16 @@ module: skip-list
 //
 // History
 //
+// 08.03.2009  DJV  Modified for Gwydion Dylan and Open Dylan.
+//                  Added iteration independent of key order.
+//                  Replaced $empty-skip-list-node with #f.
+//                  Added print-object implementation.
 // 17.03.1996  KWZ  Release of version 1.0
 //                  Uploaded the file to the Gwydion FTP server.
 // 15.03.1996  KWZ  Tail recursive reformulation of the element access functions
 //                  Provided type coercion with as
 // 13.03.1996  KWZ  Provided <collection> protocols
 // 23.01.1996  KWZ  Created in Apple Dylan TR
-// 08.03.2009  DJV  Modified for Gwydion Dylan and Open Dylan.
-//                  Added iteration independent of key order.
-//                  Replaced $empty-skip-list-node with #f.
-//                  Added print-object implementation.
 //
 //==============================================================================
 
@@ -54,7 +54,7 @@ module: skip-list
 ================================================================================
 
 Description
- 
+
 A skip-list is a data type equivalent to a balanced (binary) tree. All keys must
 be comparable by some kind of ordering function, e.g., <.
 
@@ -90,10 +90,10 @@ For details see:
   W. Pugh (1990) "Skip Lists: A Probabilistic Alternative to Balanced Trees."
   Communications of the ACM 33 (6): 668-676
 
-I tried to make the library (hash)table like. 
+I tried to make the library (hash)table like.
 
 Create a skip-list, e.g.,       define variable H = make(<skip-list>);
-Now add the elements            H[0] := "A"; H[424] := "B"; H[3] := "G";   
+Now add the elements            H[0] := "A"; H[424] := "B"; H[3] := "G";
 You can look them up via        H[3]
 Map over them with              for (x in H) signal("%s ", x) end;
 Map over them in key order      for (x in H using
@@ -101,7 +101,7 @@ Map over them in key order      for (x in H using
 Get rid of a key with           remove-key!(H, 3);
 Reorder elements with           H.element-sequence := sort(H.element-sequence);
 Of course you can use any key and not only integers, as long as you provide an
-ordering function:              make(<skip-list>, 
+ordering function:              make(<skip-list>,
                                      key-test: case-insensitive-equal?,
                                      key-order: case-insensitive-less?)
 
@@ -140,23 +140,23 @@ Kai
 //
 // Notes
 //
-// * There seems to be an error.  remove-key! is documented to be 
-//   "open generic", pp. 324.  In Apple Dylan TR I get an error message, 
+// * There seems to be an error.  remove-key! is documented to be
+//   "open generic", pp. 324.  In Apple Dylan TR I get an error message,
 //   but it works?  Comments highly welcome.
-// 
-//   ERROR MESSAGE
-//   Sealing violation in method for imported sealed generic function 
-//   "remove-key!".  The sealed generic function "remove-key!" is defined in 
-//   library "Dylan".  The method definition {method of generic function 
-//   remove-key! (x :: <basic-skip-list>, skey)}" is invalid because methods 
-//   cannot be defined for a sealed generic function outside the library that 
-//   defines the generic function. The compiler may generate optimized code 
-//   that assumes that this method is not present. You must eliminate this 
-//   method or else change the library "Dylan" to define "remove-key!" with 
-//   define open generic. 
 //
-// * No = initialization in primary classes?  It seems one has to use the 
-//   init-value keyword to initialize slots in primary classes.  Is that 
+//   ERROR MESSAGE
+//   Sealing violation in method for imported sealed generic function
+//   "remove-key!".  The sealed generic function "remove-key!" is defined in
+//   library "Dylan".  The method definition {method of generic function
+//   remove-key! (x :: <basic-skip-list>, skey)}" is invalid because methods
+//   cannot be defined for a sealed generic function outside the library that
+//   defines the generic function. The compiler may generate optimized code
+//   that assumes that this method is not present. You must eliminate this
+//   method or else change the library "Dylan" to define "remove-key!" with
+//   define open generic.
+//
+// * No = initialization in primary classes?  It seems one has to use the
+//   init-value keyword to initialize slots in primary classes.  Is that
 //   standard Dylan?  (See the end of file Tests.dylan)
 //
 // * This files was created by exporting from the TR.
@@ -173,66 +173,66 @@ define constant <next-node-vector> =
                                             singleton(#f)));
 
 
-define primary class <basic-skip-list> 
+define primary class <basic-skip-list>
   (<stretchy-collection>, <mutable-explicit-key-collection>)
   // If you use this class directly or implement your own subclasses,
   // see the notes at clear-cache
-  
+
   // PUBLIC
-  
+
   // slot accessor provides method for standard collection op "key-test"
-  slot key-test :: <function>, 
-     init-value: $default-skip-list-test, 
+  slot key-test :: <function>,
+     init-value: $default-skip-list-test,
      setter: #f,
      init-keyword: key-test:;
-  
-  // The user can provide a key comparison function 
+
+  // The user can provide a key comparison function
   slot key-order :: <function>,
      init-value: $default-skip-list-order,
      setter: #f,
      init-keyword: key-order:;
-  
-  // The level of this skip-list wont grow past this limit, default = 32, 
-  // i.e., skip-lists containing more than 2^32 elements might be stored 
-  // less efficiently.  If you provide the init-keyword level: with the 
+
+  // The level of this skip-list wont grow past this limit, default = 32,
+  // i.e., skip-lists containing more than 2^32 elements might be stored
+  // less efficiently.  If you provide the init-keyword level: with the
   // same value as max-level, you get a static level and a little less
   // garbage is produced during building.
   // If not supplied, set by initialize to allow $maximum-integer elements.
   slot max-level :: <integer>,
      init-keyword: max-level:;
-  
-  // The probability to create a new level is 1/fan-out, 
+
+  // The probability to create a new level is 1/fan-out,
   // controls the fan-out of the equivalent tree.
   // Pugh suggests the value of 1/4 for a good space/time trade-off
   constant slot probability :: <number>,
      init-value: 0.25,
      init-keyword: probability:;
-  
+
   // PRIVATE
-  
+
   // KWZ 13.03.1996  for efficiency
   slot private-size :: <integer>,
      init-value: 0;
-  
+
   // Next holds the references to the actual <skip-list-nodes>. The nodes are
   // ordered by key.
   slot next :: <next-node-vector>, init-value: make(<next-node-vector>);
-  
+
   // DJV 08.03.2009
   // Forward and backward reference the first and last nodes returned by
   // forward- or backward-iteration-protocol.
   slot forward :: false-or(<skip-list-node>), init-value: #f;
   slot backward :: false-or(<skip-list-node>), init-value: #f;
-  
+
   // The actual maximum level used, cached for efficiency.
   // If not supplied, set by initialize to 4 (given default probability).
   slot level :: <integer>,
      init-keyword: level:;
-  
+
   // This was originally a class slot, but to allow <skip-list> to be used in a
   // multi-threaded environment, this is turned into an instance slot.
   // Set by initialize.
-  slot skip-list-update-cache :: <next-node-vector>; 
+  slot skip-list-update-cache :: <next-node-vector>;
 end class;
 
 
@@ -287,16 +287,16 @@ define method random-level (skip :: <basic-skip-list>);
   // The probability to return k is exp(prob,k),
   // i.e. it decreases exponentially
   // Taken from Pugh, pp. 670
-  
+
   let max = skip.max-level;
   let prob = round/(1, skip.probability);
   let nlevel = 1;
-  
+
   while ((random(prob) < 1) &
          (nlevel < max))
     nlevel := nlevel + 1;
   end;
-  
+
   nlevel;
 end method;
 
@@ -305,15 +305,15 @@ define method clear-cache (sl :: <basic-skip-list>);
   /*
   // This note and code is not applicable when skip-list-update-cache is an
   // instance slot.
-  
+
   // The same update vector is used for all skip-lists for efficiency.
   // This could lead to the undesired effect that the update-cache is the
-  // only reference to some skip-list, so it does not get garbage collected.  
-  // To eliminate these unwanted references call clear-cache.  To be on the  
-  // safe side, use the class <skip-list>, which calls clear-cache after each 
+  // only reference to some skip-list, so it does not get garbage collected.
+  // To eliminate these unwanted references call clear-cache.  To be on the
+  // safe side, use the class <skip-list>, which calls clear-cache after each
   // add or remove operation.  In Apple Dylan you could provide some specialized
-  // garbage collection behavior, too, e.g., always flush the cache prior 
-  // to gc.  If you want to build your own optimized subclass of 
+  // garbage collection behavior, too, e.g., always flush the cache prior
+  // to gc.  If you want to build your own optimized subclass of
   // <basic-skip-list>, remember to clear the cache on occasion.
 
   let update = sl.skip-list-update-cache;
@@ -330,17 +330,17 @@ end;
 
 define method find-key-and-maintain-update (sl :: <basic-skip-list>, skey);
   // Find the node corresponding to skey
-  
+
   // Remember which pointers must be changed
   let update = sl.skip-list-update-cache;
-  
+
   // Cache the collection specific comparison functions
   let key<  = sl.key-order;
-  
+
   // Iterative Version
   // Taken from Pugh, pp. 670
   // This produces 8 bytes garbage each call with Apple TR, since := is used
-  
+
   let x = sl;
   for (i from x.level - 1 to 0 by -1)
     while (x.next[i] & key<(x.next[i].key, skey))
@@ -348,14 +348,14 @@ define method find-key-and-maintain-update (sl :: <basic-skip-list>, skey);
     end while;
     update[i] := x;
   end for;
-  
+
   // x.next[0] is #f OR
   // x.key < skey <= x.next[0].key
   x.next[0];
 
   /*
   // Tail recursive reformulation, no garbage is produced
-  
+
   local method for-loop (x, i :: <integer>)
           // Decrement the level
           if (i < 0)
@@ -366,7 +366,7 @@ define method find-key-and-maintain-update (sl :: <basic-skip-list>, skey);
               for-loop(last-node, i - 1)
           end;
         end for-loop,
-        
+
         method while-loop (x, i :: <integer>)
           // Follow pointer chain on one level
           if (x.next[i] & key<(x.next[i].key, skey))
@@ -375,7 +375,7 @@ define method find-key-and-maintain-update (sl :: <basic-skip-list>, skey);
             x
           end;
         end while-loop;
-  
+
   // result
   for-loop(sl, sl.level - 1);
   */
@@ -389,15 +389,15 @@ define method find-key-and-maintain-update (sl :: <basic-skip-list>, skey);
 //==============================================================================
 
 
-define method element (sl :: <basic-skip-list>, skey :: <object>, 
+define method element (sl :: <basic-skip-list>, skey :: <object>,
                        #key default = unsupplied())
-  => elem :: <object>;            
+  => elem :: <object>;
   // Return the value associated with skey, if skey is in the table
-  
+
   // Cache the collection specific comparison functions
   let key== = sl.key-test;
   let key<  = sl.key-order;
-  
+
   // Taken from Pugh, pp. 669
   // Old Iterative Version, since := is used on a local variable,
   // each call to element produces 8 bytes garbage in Apples TR
@@ -410,12 +410,12 @@ define method element (sl :: <basic-skip-list>, skey :: <object>,
 
   // x.next[0] is $empty-skip-list-node OR
   // x.key < skey <= x.next[0].key
-  
+
   let x = x.next[0];
-  
+
   /*
   // Tail recursive reformulation, no garbage is produced
-  
+
   local method for-loop (x, i :: <integer>)
           if (i < 0)
             // x.next[0] is #f OR
@@ -428,7 +428,7 @@ define method element (sl :: <basic-skip-list>, skey :: <object>,
            for-loop(while-loop(x, i), i - 1)
           end;
         end for-loop,
-        
+
         method while-loop (x, i :: <integer>)
           // Follow pointer chain on level i
           // while the end is not reached
@@ -440,7 +440,7 @@ define method element (sl :: <basic-skip-list>, skey :: <object>,
             x
           end;
         end while-loop;
-        
+
   let x = for-loop(sl, sl.level - 1);
   */
 
@@ -450,7 +450,7 @@ define method element (sl :: <basic-skip-list>, skey :: <object>,
     else
       default
     end
-  else 
+  else
     x.value
   end
 end method element;
@@ -459,12 +459,12 @@ end method element;
 define method element-setter (val, sl :: <basic-skip-list>, nkey)
   => val :: <object>;
   // Insert the new node in key order, and at the end of the list as iterated.
-  
+
   // Remember which pointers must be changed to point to the new node
   let update = sl.skip-list-update-cache;
-  
+
   let x = find-key-and-maintain-update(sl,nkey);
-  
+
   if (x & sl.key-test(x.key, nkey))
     // It was already there, just change the value
     x.value := val;
@@ -474,13 +474,13 @@ define method element-setter (val, sl :: <basic-skip-list>, nkey)
     let nnode = make(<skip-list-node>, level: nlevel, key: nkey, value: val);
     // Remember the old-level for the update task
     let old-level = sl.level;
-    
+
     // May need to expand the next vector
     if (nlevel > sl.next.size)
       let new-next :: <next-node-vector> = make(<next-node-vector>,
                                                 size: nlevel);
       let old-next :: <next-node-vector> = sl.next;
-      
+
       // Copy the old references
       for (n from 0 below old-level)
         new-next[n] := old-next[n];
@@ -491,15 +491,15 @@ define method element-setter (val, sl :: <basic-skip-list>, nkey)
       end for;
       sl.next := new-next;
     end if;
-    
-    // Update the pointers, only for the ones which can actually point 
+
+    // Update the pointers, only for the ones which can actually point
     // onto the new node
     for (i from 0 below min(old-level, nlevel))
       let onode = update[i];
       nnode.next[i] := onode.next[i];
       onode.next[i] := nnode;
     end;
-    
+
     // Update the iteration pointers
     if (sl.private-size = 0)
       sl.forward := nnode;
@@ -512,14 +512,14 @@ define method element-setter (val, sl :: <basic-skip-list>, nkey)
 
     // increment the size of this collection
     sl.private-size := sl.private-size + 1;
-    
+
     // update current maximum level used
     sl.level := max(sl.level, nlevel);
-    
+
     /*
     // Not necessary with instance-specific skip-list-update-cache; it is
     // already allocated at the maximum size.
-    
+
     // create a new update cache if necessary
     if (sl.next.size > update.size)
       sl.skip-list-update-cache := make(<next-node-vector>,
@@ -537,12 +537,12 @@ define method remove-key! (sl :: <basic-skip-list>, skey)
   // Delete the node containing key
   // Return #t if key was in the collection and deleted
   // Return #f if key was not in the collection and therefore not deleted
-  
+
   // Remember which pointers must be changed to point to the new node
   let update = sl.skip-list-update-cache;
-    
+
   let x = find-key-and-maintain-update(sl,skey);
-  
+
   if (x & sl.key-test(x.key, skey))
     // we found it, delete it
     for (i from 0 below x.next.size)
@@ -558,7 +558,7 @@ define method remove-key! (sl :: <basic-skip-list>, skey)
          until: sl.next[i])
       finally sl.level := i + 1;
     end;
-    
+
     // Update forward and backward iteration pointers
     case
       x.backward => x.backward.forward := x.forward;
@@ -584,8 +584,8 @@ end method;
 // A skip-list-node contains the actual data of the skip lists
 //
 define sealed primary class <skip-list-node> (<object>)
-  // We can seal it safely, because the library user should 
-  // not know this class exists.  The search key must be comparable by the 
+  // We can seal it safely, because the library user should
+  // not know this class exists.  The search key must be comparable by the
   // key-order function specified for the skip-list
   constant slot key :: <object>,
     init-value: #f,
@@ -593,7 +593,7 @@ define sealed primary class <skip-list-node> (<object>)
   slot value :: <object>, init-value: #f,
                           init-keyword: value:;
 
-  slot next :: <next-node-vector>, init-value: make(<next-node-vector>), 
+  slot next :: <next-node-vector>, init-value: make(<next-node-vector>),
                                    init-keyword: next:;
 
   slot private-forward :: false-or(<skip-list-node>),
@@ -658,20 +658,20 @@ define inline method size (skip :: <basic-skip-list>) => (size :: <integer>)
 end method;
 
 
-// as allows you to convert any collection with keys 
+// as allows you to convert any collection with keys
 // comparable by < into a skip-list
 //
 define method as(new-type == <basic-skip-list>, coll :: <collection>)
              => (result :: <basic-skip-list>);
   // Make a skip-list from the collection coll
-  
+
   copy-key-value-pairs(coll, make(new-type));
 end method as;
 
 
 define method as(new-type == <skip-list>, coll :: <collection>)
              => (result :: <skip-list>);
-  
+
   let sl = copy-key-value-pairs(coll, make(new-type));
   // clean up after converting
   clear-cache(sl);
@@ -688,7 +688,7 @@ define method copy-key-value-pairs(from :: <collection>, into :: <collection>)
        finished-state?,
        current-key,
        current-element) = forward-iteration-protocol(from);
-  
+
   for (state = initial-state then next-state(from, state),
        until: finished-state?(from, state, limit))
     into[current-key(from, state)] := current-element(from, state);
@@ -720,7 +720,7 @@ define method forward-iteration-protocol (skip-list :: <basic-skip-list>)
       copy-state :: <function>);
   values(skip-list.forward,   // The first element of the skip-list
          #f,                  // The end of the list
-         skip-list-fip-next-state, 
+         skip-list-fip-next-state,
          skip-list-ip-finished-state?,
          skip-list-ip-current-key,
          skip-list-ip-current-element,
@@ -740,7 +740,7 @@ define method backward-iteration-protocol (skip-list :: <basic-skip-list>)
       copy-state :: <function>);
   values(skip-list.backward,  // The first element of the skip-list
          #f,                  // The end of the list
-         skip-list-bip-next-state, 
+         skip-list-bip-next-state,
          skip-list-ip-finished-state?,
          skip-list-ip-current-key,
          skip-list-ip-current-element,
@@ -767,7 +767,7 @@ define method forward-by-key-iteration-protocol (skip-list :: <basic-skip-list>)
       copy-state :: <function>);
   values(skip-list.next[0],   // The first element of the skip-list
          #f,                  // The end of the list
-         skip-list-kip-next-state, 
+         skip-list-kip-next-state,
          skip-list-ip-finished-state?,
          skip-list-ip-current-key,
          skip-list-ip-current-element,
@@ -895,13 +895,13 @@ define method swap-nodes
     let temp-backward = node1.backward;
     node1.backward := node2.backward;
     node2.backward := temp-backward;
-  
+
     select (sl.forward)
       node1 => sl.forward := node2;
       node2 => sl.forward := node1;
       otherwise => #f;
     end select;
-  
+
     select (sl.backward)
       node1 => sl.backward := node2;
       node2 => sl.backward := node1;
@@ -939,7 +939,7 @@ define method print-object (o :: <basic-skip-list>, s :: <stream>) => ()
       format(s, "%= ", e);
       pprint-newline(#"fill", s);
       format(s, "keyed-by %=, ", k);
-    end for;  
+    end for;
   end printing-logical-block;
 end method;
 
@@ -952,7 +952,7 @@ end method;
 
 
 define open primary class <skip-list> (<basic-skip-list>)
-  // A skip-list that always clears its internal cache 
+  // A skip-list that always clears its internal cache
   // after modifying the data structure keys
 end class;
 
@@ -975,5 +975,3 @@ define method remove-key! (sl :: <skip-list>, skey)
   clear-cache(sl);
   result;
 end method;
-
-// End of File
